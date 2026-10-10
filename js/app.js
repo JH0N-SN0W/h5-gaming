@@ -3,7 +3,6 @@
     arcade:'🕹️', puzzle:'🧩', shooter:'🎯', racing:'🏎️', casual:'🎈',
     platformer:'🏃', sports:'⚽', board:'♟️', '3d':'🌐', 'word-quiz':'📝'
   };
-  const CAT_EMOJI = { Popular:'🔥', Casual:'🎈', Shooting:'🎯', Race:'🏎️', Puzzle:'🧩' };
 
   let GAMES = [];
   let bannerTimer = null;
@@ -17,10 +16,24 @@
     return String(n);
   }
 
-  function cardHTML(g){
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function thumbSrc(g){
+    if (g.thumb) return g.thumb;
+    return `icons/${encodeURIComponent(g.id)}.svg`;
+  }
+
+  function thumbHTML(g, cls=''){
+    const src = thumbSrc(g);
     const em = EMOJI[g.category] || '🎮';
-    return `<article class="game-card" data-id="${g.id}">
-      <a class="thumb" href="#/play/${encodeURIComponent(g.id)}" aria-label="Play ${escapeHtml(g.title)}"><span>${em}</span></a>
+    return `<img class="thumb-img ${cls}" src="${escapeHtml(src)}" alt="" width="72" height="72" loading="lazy" decoding="async" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${em}',className:'thumb-fallback'}))">`;
+  }
+
+  function cardHTML(g){
+    return `<article class="game-card" data-id="${escapeHtml(g.id)}">
+      <a class="thumb" href="#/play/${encodeURIComponent(g.id)}" aria-label="Play ${escapeHtml(g.title)}">${thumbHTML(g)}</a>
       <div class="g-info">
         <h4 class="g-title"><a href="#/play/${encodeURIComponent(g.id)}">${escapeHtml(g.title)}</a></h4>
         <div class="g-meta">
@@ -33,10 +46,6 @@
         <a class="btn btn-play btn-sm" href="#/play/${encodeURIComponent(g.id)}">Play</a>
       </div>
     </article>`;
-  }
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
   function renderGrid(el, list){
@@ -53,9 +62,8 @@
     const track = $('#banner-track');
     const dots = $('#banner-dots');
     track.innerHTML = items.map(g => {
-      const em = EMOJI[g.category] || '🎮';
       return `<div class="banner-slide">
-        <div class="bg-emoji">${em}</div>
+        <div class="banner-art">${thumbHTML(g, 'banner-thumb')}</div>
         <div class="banner-meta">
           <h2>${escapeHtml(g.title)}</h2>
           <p>${escapeHtml(g.description || g.uiCategory)}</p>
@@ -172,7 +180,6 @@
       return;
     }
 
-    // home or search-on-home
     if (q) {
       const list = filterGames({q});
       showViews('list');
@@ -198,7 +205,6 @@
   $('#search').addEventListener('input', () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
-      // if on play page, go to search list
       if ((location.hash || '').includes('/play/')) location.hash = '#/';
       route();
     }, 180);
