@@ -1,4 +1,4 @@
-# Arcade Box (h5gaming1)
+# Altaigame Box (h5gaming1)
 
 English-only mobile H5 game box for `h5gaming1.altaimobile.com`.
 
